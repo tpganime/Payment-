@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Pay Me ₹20</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      text-align: center;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+      color: #333;
+    }
+
+    .card {
+      perspective: 1000px;
+      animation: float 4s infinite ease-in-out;
+    }
+
+    .qr-container {
+      width: 300px;
+      height: 300px;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+      transform-style: preserve-3d;
+      transition: transform 0.5s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    .qr-container img {
+      max-width: 90%;
+      max-height: 90%;
+      border-radius: 10px;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    #uploadSection {
+      display: none;
+      margin-top: 20px;
+    }
+
+    input[type="file"] {
+      padding: 10px;
+      border: 1px solid #aaa;
+      border-radius: 10px;
+      background: #fff;
+    }
+
+    .btn-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    .pay-btn {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 30px;
+      background-color: #0078d4;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+      transition: transform 0.2s, background 0.3s;
+    }
+
+    .pay-btn:hover {
+      background-color: #005da0;
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Pay ₹20 by Scanning or Using an App</h1>
+
+  <div class="card">
+    <div class="qr-container" id="qrBox">
+      <img src="picture.qr.png" alt="Your QR Code" id="qrImage">
+    </div>
+  </div>
+
+  <div class="btn-container">
+    <button class="pay-btn" onclick="redirectTo('phonepe')">PhonePe</button>
+    <button class="pay-btn" onclick="redirectTo('paytm')">Paytm</button>
+    <button class="pay-btn" onclick="redirectTo('gpay')">Google Pay</button>
+    <button class="pay-btn" onclick="redirectTo('fampay')">FamPay</button>
+    <button class="pay-btn" onclick="redirectTo('upi')">Other UPI App</button>
+  </div>
+
+  <div id="uploadSection">
+    <p>Upload your new QR code:</p>
+    <input type="file" accept="image/*" onchange="updateQR(event)">
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('admin') === 'true') {
+      document.getElementById('uploadSection').style.display = 'block';
+    }
+
+    function updateQR(event) {
+      const reader = new FileReader();
+      reader.onload = function() {
+        const img = document.getElementById("qrImage");
+        img.src = reader.result;
+        localStorage.setItem("qrImage", reader.result);
+      };
+      reader.readAsDataURL(event.target.files[0]);
+    }
+
+    window.onload = () => {
+      const savedQR = localStorage.getItem("qrImage");
+      if (savedQR) {
+        document.getElementById("qrImage").src = savedQR;
+      }
+    };
+
+    function redirectTo(app) {
+      const upiID = "7383718802@omni";
+      const amount = "20";
+      let url = "";
+
+      switch (app) {
+        case "phonepe":
+          url = `phonepe://pay?pa=${upiID}&pn=Payment&am=${amount}&cu=INR`;
+          break;
+        case "paytm":
+          url = `paytmmp://pay?pa=${upiID}&pn=Payment&am=${amount}&cu=INR`;
+          break;
+        case "gpay":
+          url = `gpay://upi/pay?pa=${upiID}&pn=Payment&am=${amount}&cu=INR`;
+          break;
+        case "fampay":
+          url = `fampay://upi/pay?pa=${upiID}&pn=Payment&am=${amount}&cu=INR`;
+          break;
+        case "upi":
+          url = `upi://pay?pa=${upiID}&pn=Payment&am=${amount}&cu=INR`;
+          break;
+      }
+
+      window.location.href = url;
+    }
+  </script>
+
+</body>
+</html>
